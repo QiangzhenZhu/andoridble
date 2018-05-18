@@ -11,6 +11,7 @@ import android.widget.Toast;
 import com.example.admin.mybledemo.BlueToothSocket;
 import com.example.admin.mybledemo.BtDeviceAdapter;
 import com.example.admin.mybledemo.ColorPickerView;
+import com.example.admin.mybledemo.MyApplication;
 import com.example.admin.mybledemo.R;
 
 import java.util.ArrayList;
@@ -40,11 +41,8 @@ public class ColorPickerActivity extends AppCompatActivity {
         initView();
         initRgbPicker();
         Intent intent = getIntent();
-        btDevice = intent.getParcelableExtra("BLUE");
+        btDevice = MyApplication.getBtDevice();
 //        Toast.makeText(ColorPickerActivity.this,btDevice.getmState(),Toast.LENGTH_SHORT).show();
-        mBtManager = new BtManager(this, mBtListener);
-        BlueToothSocket myapp=((BlueToothSocket)getApplicationContext());
-        btDevice.setBluetoothSocket(myapp.getSocket());
     }
     private BtManager.BtDeviceListener mBtListener = new BtManager.BtDeviceListener() {
         @Override

@@ -1,8 +1,11 @@
 package com.example.admin.mybledemo;
 
 import android.app.Application;
+import android.bluetooth.BluetoothClass;
 
 import com.orhanobut.logger.Logger;
+
+import cn.com.heaton.blelibrary.spp.BtDevice;
 
 
 /**
@@ -33,6 +36,15 @@ import com.orhanobut.logger.Logger;
 public class MyApplication extends Application {
 
     private static MyApplication mApplication;
+    private static BtDevice btDevice;
+
+    public static BtDevice getBtDevice() {
+        return btDevice;
+    }
+
+    public static void setBtDevice(BtDevice btDevice) {
+        MyApplication.btDevice = btDevice;
+    }
 
     @Override
     public void onCreate() {

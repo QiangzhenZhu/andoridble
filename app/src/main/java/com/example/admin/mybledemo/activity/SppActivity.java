@@ -14,6 +14,7 @@ import android.widget.Toast;
 
 import com.example.admin.mybledemo.BlueToothSocket;
 import com.example.admin.mybledemo.BtDeviceAdapter;
+import com.example.admin.mybledemo.MyApplication;
 import com.example.admin.mybledemo.R;
 import com.example.admin.mybledemo.annotation.ViewInit;
 import com.orhanobut.logger.Logger;
@@ -42,7 +43,6 @@ public class SppActivity extends BaseActivity implements AdapterView.OnItemClick
     //播放音乐
     boolean lock = false;//默认关
     private CountDownTimer countDownTimer;
-    private BtDevice device;
 
     @Override
     protected int getLayoutResource() {
@@ -62,29 +62,27 @@ public class SppActivity extends BaseActivity implements AdapterView.OnItemClick
 
     @Override
     public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
-        device = mBtAdapter.getDevice(position);
+        MyApplication.setBtDevice(mBtAdapter.getDevice(position));
 //        Toast.makeText(SppActivity.this,device.getmName(),Toast.LENGTH_SHORT).show();
-        if (device == null) return;
+        if (MyApplication.getBtDevice() == null) return;
         if (isScanning) {
             mBtManager.cancelDiscovery();
         }
-        if (device.isConnected()) {
-            device.close();
+        if (MyApplication.getBtDevice().isConnected()) {
+            MyApplication.getBtDevice().close();
         } else {
-            mBtManager.addDevice(device);
+            mBtManager.addDevice(MyApplication.getBtDevice());
 //                    BtUtils.pair(device);
-            mBtManager.connect(device);
+
+            mBtManager.connect(MyApplication.getBtDevice());
             countDownTimer = new CountDownTimer(500000,500) {
 
                 @Override
                 public void onTick(long l) {
-                    if (device.getmState() == 0xa03) {
+                    if (MyApplication.getBtDevice().getmState() == 0xa03) {
                         countDownTimer.cancel();
                         Toast.makeText(SppActivity.this, "Connect success!", Toast.LENGTH_SHORT).show();
                         Intent intent = new Intent(SppActivity.this, ColorPickerActivity.class);
-                        intent.putExtra("BLUE", device);
-                        BlueToothSocket myapp=((BlueToothSocket)getApplicationContext());
-                        myapp.setSocket(device.getmBluetoothSocket());
                         startActivity(intent);
                     }
                 }
