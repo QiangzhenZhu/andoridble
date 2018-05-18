@@ -2,6 +2,8 @@ package cn.com.heaton.blelibrary.spp;
 
 import android.bluetooth.BluetoothDevice;
 import android.bluetooth.BluetoothSocket;
+import android.os.Parcel;
+import android.os.Parcelable;
 import android.text.TextUtils;
 import android.util.Log;
 
@@ -17,7 +19,7 @@ import cn.com.heaton.blelibrary.BuildConfig;
  * Created by LiuLei on 2017/9/14.
  */
 
-public class BtDevice implements Serializable{
+public class BtDevice implements Parcelable{
 	public final static String TAG = BtDevice.class.getSimpleName();
 
 	private final static int WRITE_TIMEOUT = 3000;// 写入超时时间
@@ -28,6 +30,32 @@ public class BtDevice implements Serializable{
 
 	private static int mDeviceIndex = 1;
 
+
+	protected BtDevice(Parcel in) {
+		mState = in.readInt();
+		mSecure = in.readByte() != 0;
+		mReading = in.readByte() != 0;
+		mDevice = in.readParcelable(BluetoothDevice.class.getClassLoader());
+		mIndex = in.readInt();
+		mName = in.readString();
+		mAlias = in.readString();
+		mDelete = in.readByte() != 0;
+		mMaster = in.readByte() != 0;
+		mRewrite = in.readByte() != 0;
+	}
+
+	public static final Creator<BtDevice> CREATOR = new Creator<BtDevice>() {
+		@Override
+		public BtDevice createFromParcel(Parcel in) {
+			return new BtDevice(in);
+		}
+
+		@Override
+		public BtDevice[] newArray(int size) {
+			return new BtDevice[size];
+		}
+	};
+
 	public int getmState() {
 		return mState;
 	}
@@ -36,7 +64,12 @@ public class BtDevice implements Serializable{
 	private boolean         mSecure;//是否加密
 	private boolean         mReading;//是否正在读取数据
 	private BluetoothDevice mDevice;//绑定的系统蓝牙设备对象
-	private BluetoothSocket mBluetoothSocket;//连接的蓝牙套字节
+
+    public BluetoothSocket getmBluetoothSocket() {
+        return mBluetoothSocket;
+    }
+
+    private BluetoothSocket mBluetoothSocket;//连接的蓝牙套字节
 	private BtManager       mBtManager;//蓝牙设备管理器
 	private ReadThread      mReadThread;//读取数据线程
 	private ConnectThread   mConnectThread;//连接线程
@@ -279,10 +312,29 @@ public class BtDevice implements Serializable{
 		}
 	}
 
+	@Override
+	public int describeContents() {
+		return 0;
+	}
+
+	@Override
+	public void writeToParcel(Parcel parcel, int i) {
+		parcel.writeInt(mState);
+		parcel.writeByte((byte) (mSecure ? 1 : 0));
+		parcel.writeByte((byte) (mReading ? 1 : 0));
+		parcel.writeParcelable(mDevice, i);
+		parcel.writeInt(mIndex);
+		parcel.writeString(mName);
+		parcel.writeString(mAlias);
+		parcel.writeByte((byte) (mDelete ? 1 : 0));
+		parcel.writeByte((byte) (mMaster ? 1 : 0));
+		parcel.writeByte((byte) (mRewrite ? 1 : 0));
+	}
+
 	/**
 	 * 连接线程
 	 */
-	class ConnectThread extends Thread implements Serializable{
+	class ConnectThread extends Thread  {
 		@Override
 		public void run() {
 			super.run();
@@ -353,12 +405,13 @@ public class BtDevice implements Serializable{
 			}
 			mBtManager.onStateChanged(mState, BtDevice.this);
 		}
+
 	}
 
 	/**
 	 * 读取线程
 	 */
-	class ReadThread extends Thread implements Serializable{
+	class ReadThread extends Thread {
 		@Override
 		public void run() {
 			super.run();
@@ -374,6 +427,7 @@ public class BtDevice implements Serializable{
 				}
 			}
 		}
+
 	}
 
 	/**

@@ -12,6 +12,7 @@ import android.widget.ListView;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import com.example.admin.mybledemo.BlueToothSocket;
 import com.example.admin.mybledemo.BtDeviceAdapter;
 import com.example.admin.mybledemo.R;
 import com.example.admin.mybledemo.annotation.ViewInit;
@@ -35,11 +36,13 @@ public class SppActivity extends BaseActivity implements AdapterView.OnItemClick
     @ViewInit(R.id.connected_num)
     private TextView mConnectedNum;
     private BtDeviceAdapter mBtAdapter;
+
     private BtManager mBtManager;
     private boolean isScanning = false;//是否正在扫描
     //播放音乐
     boolean lock = false;//默认关
     private CountDownTimer countDownTimer;
+    private BtDevice device;
 
     @Override
     protected int getLayoutResource() {
@@ -59,7 +62,8 @@ public class SppActivity extends BaseActivity implements AdapterView.OnItemClick
 
     @Override
     public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
-        final BtDevice device = mBtAdapter.getDevice(position);
+        device = mBtAdapter.getDevice(position);
+//        Toast.makeText(SppActivity.this,device.getmName(),Toast.LENGTH_SHORT).show();
         if (device == null) return;
         if (isScanning) {
             mBtManager.cancelDiscovery();
@@ -79,6 +83,8 @@ public class SppActivity extends BaseActivity implements AdapterView.OnItemClick
                         Toast.makeText(SppActivity.this, "Connect success!", Toast.LENGTH_SHORT).show();
                         Intent intent = new Intent(SppActivity.this, ColorPickerActivity.class);
                         intent.putExtra("BLUE", device);
+                        BlueToothSocket myapp=((BlueToothSocket)getApplicationContext());
+                        myapp.setSocket(device.getmBluetoothSocket());
                         startActivity(intent);
                     }
                 }
@@ -175,6 +181,7 @@ public class SppActivity extends BaseActivity implements AdapterView.OnItemClick
                 oc[3] = 'T';
                 oc[4] = 'E';
                 oc[5] = (byte) (lock ? '1': '0');
+//                BtDevice btDevice = mBtManager.getConnectedDevices().get(0);
                 boolean result = mBtManager.getConnectedDevices().get(0).sendOnePacket(oc, 10, true);
                 Log.e(TAG, "sendData: "+result);
             }
